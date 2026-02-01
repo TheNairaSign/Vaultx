@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vaultx/core/di/injector.dart';
 import 'package:vaultx/core/security/session/session_lifecycle_observer.dart';
-import 'package:vaultx/features/vault/presentation/pages/vault_test_page.dart';
+import 'package:vaultx/features/vault/presentation/pages/vault_item_details_page.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,16 +39,13 @@ class _VaultXState extends ConsumerState<VaultX> {
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           useMaterial3: true,
+          scaffoldBackgroundColor: const Color(0xFF0A0E14),
           colorScheme: ColorScheme.fromSeed(
             seedColor: Colors.blue,
             brightness: Brightness.dark,
           ),
         ),
-        home: VaultTestPage(
-          vaultService: ref.read(vaultServiceProvider),
-          sessionManager: ref.read(sessionManagerProvider),
-          repository: ref.read(vaultItemRepositoryProvider),
-        ),
+        home: const VaultItemDetailsPage(),
       ),
     );
   }
