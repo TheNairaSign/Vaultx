@@ -3,7 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vaultx/core/di/injector.dart';
 import 'package:vaultx/core/security/session/session_lifecycle_observer.dart';
-import 'package:vaultx/features/vault/presentation/pages/vault_item_details_page.dart';
+import 'package:vaultx/features/vault/presentation/pages/vault_folders_page.dart';
+import 'package:vaultx/features/vault/presentation/bloc/vault_event.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,9 +34,9 @@ class _VaultXState extends ConsumerState<VaultX> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => ref.watch(vaultBlocProvider),
+      create: (context) => ref.watch(vaultBlocProvider)..add(FetchFolders()),
       child: MaterialApp(
-        title: 'VaultX',    
+        title: 'VaultX',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           useMaterial3: true,
@@ -45,7 +46,7 @@ class _VaultXState extends ConsumerState<VaultX> {
             brightness: Brightness.dark,
           ),
         ),
-        home: const VaultItemDetailsPage(),
+        home: const VaultFoldersPage(),
       ),
     );
   }

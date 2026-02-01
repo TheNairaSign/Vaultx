@@ -10,6 +10,8 @@ class EncryptedItem {
   final DateTime createdAt;
   final DateTime updatedAt;
 
+  final String? folderId;
+
   EncryptedItem({
     required this.id,
     required this.title,
@@ -18,6 +20,7 @@ class EncryptedItem {
     required this.mac,
     required this.createdAt,
     required this.updatedAt,
+    this.folderId,
   });
 
   EncryptedPayload toPayload() => EncryptedPayload(
@@ -32,6 +35,7 @@ class EncryptedItem {
     required EncryptedPayload payload,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? folderId,
   }) {
     final now = DateTime.now();
     return EncryptedItem(
@@ -42,6 +46,7 @@ class EncryptedItem {
       mac: payload.mac,
       createdAt: createdAt ?? now,
       updatedAt: updatedAt ?? now,
+      folderId: folderId,
     );
   }
 }

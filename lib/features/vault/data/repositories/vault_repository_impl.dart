@@ -5,6 +5,7 @@ import 'package:vaultx/core/security/session/vault_session_manager.dart';
 import 'package:vaultx/core/security/vault_metadata.dart';
 import 'package:vaultx/features/vault/data/repositories/vault_crypto_impl.dart';
 import 'package:vaultx/features/vault/domain/entities/encrypted_item.dart';
+import 'package:vaultx/features/vault/domain/entities/vault_folder.dart';
 import 'package:vaultx/features/vault/domain/repositories/vault_repository.dart';
 
 class VaultRepositoryImpl implements VaultRepository, VaultItemRepository {
@@ -13,6 +14,7 @@ class VaultRepositoryImpl implements VaultRepository, VaultItemRepository {
   final FlutterSecureStorage secureStorage;
 
   static const String _itemsKey = 'vault_items_list';
+  static const String _foldersKey = 'vault_folders_list';
   static const String _saltKey = 'vault_salt';
   static const String _createdKey = 'vault_created_at';
 
@@ -71,21 +73,18 @@ class VaultRepositoryImpl implements VaultRepository, VaultItemRepository {
   }
 
   @override
-  Future<List<EncryptedItem>> getItems() async {
+  Future<List<EncryptedItem>> getItems({String? folderId}) async {
     final data = await secureStorage.read(key: _itemsKey);
     if (data == null) return [];
 
     final List<dynamic> jsonList = json.decode(data);
-    // In a real app, we'd map these to a more structured local storage, 
-    // but for now we'll store everything in JSON strings for simplicity.
-    // Each item is stored serialized.
     
     final List<EncryptedItem> items = [];
     for (final id in jsonList) {
       final itemData = await secureStorage.read(key: 'vault_item_$id');
       if (itemData != null) {
         final map = json.decode(itemData);
-        items.add(EncryptedItem(
+        final item = EncryptedItem(
           id: id,
           title: map['title'],
           ciphertext: base64Decode(map['ciphertext']),
@@ -93,7 +92,13 @@ class VaultRepositoryImpl implements VaultRepository, VaultItemRepository {
           mac: base64Decode(map['mac']),
           createdAt: DateTime.parse(map['createdAt']),
           updatedAt: DateTime.parse(map['updatedAt']),
-        ));
+          folderId: map['folderId'],
+        );
+        
+        // Filter by folderId if provided
+        if (folderId == null || item.folderId == folderId) {
+          items.add(item);
+        }
       }
     }
     return items;
@@ -108,6 +113,7 @@ class VaultRepositoryImpl implements VaultRepository, VaultItemRepository {
       'mac': base64Encode(item.mac),
       'createdAt': item.createdAt.toIso8601String(),
       'updatedAt': item.updatedAt.toIso8601String(),
+      'folderId': item.folderId,
     });
 
     await secureStorage.write(key: 'vault_item_${item.id}', value: itemData);
@@ -153,8 +159,68 @@ class VaultRepositoryImpl implements VaultRepository, VaultItemRepository {
       'mac': base64Encode(item.mac),
       'createdAt': item.createdAt.toIso8601String(),
       'updatedAt': DateTime.now().toIso8601String(),
+      'folderId': item.folderId,
     });
 
     await secureStorage.write(key: 'vault_item_${item.id}', value: itemData);
+  }
+
+  // --- Folder Operations ---
+
+  @override
+  Future<List<VaultFolder>> getFolders() async {
+    final data = await secureStorage.read(key: _foldersKey);
+    if (data == null) return [];
+
+    final List<dynamic> jsonList = json.decode(data);
+    final List<VaultFolder> folders = [];
+
+    for (final id in jsonList) {
+      final folderData = await secureStorage.read(key: 'vault_folder_$id');
+      if (folderData != null) {
+        folders.add(VaultFolder.fromJson(json.decode(folderData)));
+      }
+    }
+    return folders;
+  }
+
+  @override
+  Future<void> saveFolder(VaultFolder folder) async {
+    final folderData = json.encode(folder.toJson());
+    await secureStorage.write(key: 'vault_folder_${folder.id}', value: folderData);
+
+    final currentListJson = await secureStorage.read(key: _foldersKey) ?? '[]';
+    final List<dynamic> ids = json.decode(currentListJson);
+
+    if (!ids.contains(folder.id)) {
+      ids.add(folder.id);
+      await secureStorage.write(key: _foldersKey, value: json.encode(ids));
+    }
+  }
+
+  @override
+  Future<void> deleteFolder(String id) async {
+    await secureStorage.delete(key: 'vault_folder_$id');
+
+    final currentList = await secureStorage.read(key: _foldersKey) ?? '[]';
+    final List<dynamic> ids = json.decode(currentList);
+    ids.remove(id);
+    await secureStorage.write(key: _foldersKey, value: json.encode(ids));
+
+    // Optional: Dissociate items from this folder (set their folderId to null)
+    final items = await getItems(folderId: id);
+    for (final item in items) {
+      final updatedItem = EncryptedItem(
+        id: item.id,
+        title: item.title,
+        ciphertext: item.ciphertext,
+        nonce: item.nonce,
+        mac: item.mac,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+        folderId: null,
+      );
+      await saveItem(updatedItem);
+    }
   }
 }
