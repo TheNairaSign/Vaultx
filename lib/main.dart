@@ -1,63 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:vaultx/core/di/injector.dart';
 import 'package:vaultx/core/security/session/session_lifecycle_observer.dart';
-import 'package:vaultx/core/security/session/vault_session_manager.dart';
-import 'package:vaultx/core/services/vault_service.dart';
-import 'package:vaultx/features/vault/data/repositories/vault_crypto_impl.dart';
-import 'package:vaultx/features/vault/data/repositories/vault_repository_impl.dart';
-import 'package:vaultx/features/vault/domain/usecases/unlock_bloc_use_case.dart';
-import 'package:vaultx/features/vault/presentation/bloc/vault_bloc.dart';
 import 'package:vaultx/features/vault/presentation/pages/vault_test_page.dart';
 
-void main(List<String> args) {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const VaultX());
+  runApp(
+    const ProviderScope(
+      child: VaultX(),
+    ),
+  );
 }
 
-class VaultX extends StatefulWidget {
+class VaultX extends ConsumerStatefulWidget {
   const VaultX({super.key});
 
   @override
-  State<VaultX> createState() => _VaultXState();
+  ConsumerState<VaultX> createState() => _VaultXState();
 }
 
-class _VaultXState extends State<VaultX> {
-  late final SessionManager sessionManager;
-  late final VaultCryptoImpl crypto;
-  late final FlutterSecureStorage secureStorage;
-  late final VaultService vaultService;
-  late final VaultRepositoryImpl repository;
-  late final UnlockVaultUsecase unlockVaultUsecase;
-
+class _VaultXState extends ConsumerState<VaultX> {
   @override
   void initState() {
     super.initState();
-    sessionManager = SessionManager();
-    crypto = VaultCryptoImpl();
-    secureStorage = const FlutterSecureStorage();
-    vaultService = VaultService(crypto, sessionManager, secureStorage);
-    unlockVaultUsecase = UnlockVaultUsecase(sessionManager, repository: repository);
-    repository = VaultRepositoryImpl(
-      sessionManager: sessionManager,
-      encryptionService: crypto,
-      secureStorage: secureStorage,
-    );
-
+    // Initialize the lifecycle observer with the session manager from Riverpod
+    final sessionManager = ref.read(sessionManagerProvider);
     WidgetsBinding.instance.addObserver(SessionLifecycleObserver(sessionManager));
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => VaultBloc(
-        repository: repository,
-        crypto: crypto,
-        sessionManager: sessionManager,
-        unlockVaultUsecase: unlockVaultUsecase
-      ),
+      create: (context) => ref.watch(vaultBlocProvider),
       child: MaterialApp(
-        title: 'VaultX',
+        title: 'VaultX',    
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           useMaterial3: true,
@@ -67,9 +45,9 @@ class _VaultXState extends State<VaultX> {
           ),
         ),
         home: VaultTestPage(
-          vaultService: vaultService,
-          sessionManager: sessionManager,
-          repository: repository,
+          vaultService: ref.read(vaultServiceProvider),
+          sessionManager: ref.read(sessionManagerProvider),
+          repository: ref.read(vaultItemRepositoryProvider),
         ),
       ),
     );
