@@ -99,6 +99,7 @@ class _CreateSecretPageState extends State<CreateSecretPage> {
               hint: 'Enter secret content...',
               maxLines: 6,
               obscureText: _isContentHidden,
+              fontFamily: 'KeysFont',
             ),
             const SizedBox(height: 8),
             const Text(
@@ -138,18 +139,22 @@ class _CreateSecretPageState extends State<CreateSecretPage> {
     required String hint,
     int maxLines = 1,
     bool obscureText = false,
+    String? fontFamily,
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: VaultColors.cardBackground.withOpacity(0.5),
+        color: VaultColors.cardBackground.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: VaultColors.textMuted.withOpacity(0.2)),
+        border: Border.all(color: VaultColors.textMuted.withValues(alpha: 0.2)),
       ),
       child: TextField(
         controller: controller,
         maxLines: maxLines,
         obscureText: obscureText,
-        style: const TextStyle(color: VaultColors.textPrimary),
+        style: TextStyle(
+          color: VaultColors.textPrimary,
+          fontFamily: fontFamily,
+        ),
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: const TextStyle(color: VaultColors.textMuted),
@@ -167,9 +172,9 @@ class _CreateSecretPageState extends State<CreateSecretPage> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: VaultColors.cardBackground.withOpacity(0.5),
+        color: VaultColors.cardBackground.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: VaultColors.textMuted.withOpacity(0.2)),
+        border: Border.all(color: VaultColors.textMuted.withValues(alpha: 0.2)),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: DropdownButtonHideUnderline(
@@ -191,16 +196,16 @@ class _CreateSecretPageState extends State<CreateSecretPage> {
   Widget _buildFolderPicker() {
     return Container(
       decoration: BoxDecoration(
-        color: VaultColors.cardBackground.withOpacity(0.5),
+        color: VaultColors.cardBackground.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: VaultColors.textMuted.withOpacity(0.2)),
+        border: Border.all(color: VaultColors.textMuted.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              border: Border(right: BorderSide(color: VaultColors.textMuted.withOpacity(0.1))),
+              border: Border(right: BorderSide(color: VaultColors.textMuted.withValues(alpha: 0.1))),
             ),
             child: const Icon(Icons.folder_shared_outlined, color: VaultColors.textSecondary, size: 20),
           ),
@@ -220,7 +225,7 @@ class _CreateSecretPageState extends State<CreateSecretPage> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: VaultColors.secondary.withOpacity(0.5),
+              color: VaultColors.secondary.withValues(alpha: 0.5),
               borderRadius: const BorderRadius.horizontal(right: Radius.circular(16)),
             ),
             child: const Icon(Icons.lock_outline, color: VaultColors.textMuted, size: 20),
@@ -252,7 +257,7 @@ class _CreateSecretPageState extends State<CreateSecretPage> {
           padding: const EdgeInsets.symmetric(vertical: 18),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           elevation: 8,
-          shadowColor: VaultColors.primary.withOpacity(0.5),
+          shadowColor: VaultColors.primary.withValues(alpha: 0.5),
           textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
       ),

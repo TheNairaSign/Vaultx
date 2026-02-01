@@ -15,7 +15,7 @@ class OneLineRenderer extends StatelessWidget {
         secret,
         style: const TextStyle(
           color: VaultColors.textPrimary,
-          fontFamily: 'monospace',
+          fontFamily: 'KeysFont',
           fontSize: 16,
           letterSpacing: 1.2,
         ),
@@ -70,7 +70,7 @@ class PasskeyGrid extends StatelessWidget {
               text,
               style: const TextStyle(
                 color: VaultColors.textPrimary,
-                fontFamily: 'monospace',
+                fontFamily: 'KeysFont',
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
               ),
@@ -111,7 +111,7 @@ class MultiBlockRenderer extends StatelessWidget {
         text,
         style: const TextStyle(
           color: VaultColors.textPrimary,
-          fontFamily: 'monospace',
+          fontFamily: 'KeysFont',
           fontSize: 13,
           height: 1.5,
         ),

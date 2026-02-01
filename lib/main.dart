@@ -40,6 +40,7 @@ class _VaultXState extends ConsumerState<VaultX> {
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           useMaterial3: true,
+          fontFamily: 'PrimaryFont',
           scaffoldBackgroundColor: const Color(0xFF0A0E14),
           colorScheme: ColorScheme.fromSeed(
             seedColor: Colors.blue,
