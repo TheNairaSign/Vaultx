@@ -58,13 +58,13 @@ class AddItemSheet extends StatelessWidget {
             subtitle: 'Organize your credentials by category',
             onTap: onNewFolder,
           ),
-          const SizedBox(height: 12),
-          _buildOption(
-            icon: Icons.file_upload_outlined,
-            title: 'Import File',
-            subtitle: 'Upload backup or encrypted files',
-            onTap: onImportFile,
-          ),
+          // const SizedBox(height: 12),
+          // _buildOption(
+          //   icon: Icons.file_upload_outlined,
+          //   title: 'Import File',
+          //   subtitle: 'Upload backup or encrypted files',
+          //   onTap: onImportFile,
+          // ),
           const SizedBox(height: 24),
           SizedBox(
             width: double.infinity,

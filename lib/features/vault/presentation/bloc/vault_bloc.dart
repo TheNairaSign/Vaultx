@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,6 +11,7 @@ import 'vault_event.dart';
 import 'vault_state.dart';
 
 import 'package:vaultx/features/vault/domain/entities/vault_folder.dart';
+import 'dart:developer' as developer;
 
 class VaultBloc extends Bloc<VaultEvent, VaultState> {
   final VaultItemRepository repository;
@@ -89,6 +91,8 @@ class VaultBloc extends Bloc<VaultEvent, VaultState> {
         plaintext: event.content,
       );
 
+      developer.log('Encrypted payload: ${payload.toString()}');
+
       final item = EncryptedItem.fromPayload(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         title: event.title,
@@ -96,9 +100,12 @@ class VaultBloc extends Bloc<VaultEvent, VaultState> {
         folderId: event.folderId,
       );
 
+      developer.log('Encrypted item: ${item.toString()}');
+
       await repository.saveItem(item);
       add(FetchItems(folderId: event.folderId));
     } catch (e) {
+      developer.log("Error adding item $e", name: "VaultBloc");
       emit(VaultError(e.toString()));
     }
   }

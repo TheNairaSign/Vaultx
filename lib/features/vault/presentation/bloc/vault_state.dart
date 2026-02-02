@@ -9,9 +9,11 @@ abstract class VaultState extends Equatable {
   List<Object?> get props => [];
 }
 
-class VaultInitial extends VaultState {}
-
 class VaultLoading extends VaultState {}
+
+class VaultNeedsSetup extends VaultState {}
+
+class VaultInitial extends VaultState {}
 
 class VaultLoaded extends VaultState {
   final List<EncryptedItem> items;
