@@ -64,7 +64,8 @@ final unlockVaultUsecaseProvider = Provider<UnlockVaultUsecase>((ref) {
 
 final vaultBlocProvider = Provider<VaultBloc>((ref) {
   return VaultBloc(
-    repository: ref.watch(vaultItemRepositoryProvider),
+    itemRepository: ref.watch(vaultItemRepositoryProvider),
+    vaultRepository: ref.watch(vaultRepositoryProvider),
     crypto: ref.watch(cryptoProvider),
     sessionManager: ref.watch(sessionManagerProvider),
     unlockVaultUsecase: ref.watch(unlockVaultUsecaseProvider),

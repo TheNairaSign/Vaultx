@@ -15,6 +15,8 @@ class VaultNeedsSetup extends VaultState {}
 
 class VaultInitial extends VaultState {}
 
+class VaultLocked extends VaultState {}
+
 class VaultLoaded extends VaultState {
   final List<EncryptedItem> items;
   final List<VaultFolder> folders;

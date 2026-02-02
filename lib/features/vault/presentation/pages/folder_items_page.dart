@@ -107,7 +107,7 @@ class _FolderItemsPageState extends State<FolderItemsPage> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: VaultColors.secondary.withOpacity(0.5),
+          color: VaultColors.secondary.withValues(alpha: 0.5),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -116,7 +116,7 @@ class _FolderItemsPageState extends State<FolderItemsPage> {
             const SizedBox(width: 12),
             Text(
               'Sorted by name',
-              style: TextStyle(color: VaultColors.textMuted.withOpacity(0.7), fontSize: 14),
+              style: TextStyle(color: VaultColors.textMuted.withValues(alpha: 0.7), fontSize: 14),
             ),
           ],
         ),
@@ -165,7 +165,7 @@ class _FolderItemsPageState extends State<FolderItemsPage> {
               width: 50,
               height: 50,
               decoration: BoxDecoration(
-                color: iconColor.withOpacity(0.1),
+                color: iconColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Icon(iconData, color: iconColor, size: 24),
@@ -206,7 +206,7 @@ class _FolderItemsPageState extends State<FolderItemsPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.folder_open, size: 64, color: VaultColors.textMuted.withOpacity(0.5)),
+          Icon(Icons.folder_open, size: 64, color: VaultColors.textMuted.withValues(alpha: 0.5)),
           const SizedBox(height: 16),
           const Text(
             'This folder is empty',

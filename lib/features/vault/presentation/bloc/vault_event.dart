@@ -7,6 +7,8 @@ abstract class VaultEvent extends Equatable {
   List<Object?> get props => [];
 }
 
+class CheckInitializationStatus extends VaultEvent {}
+
 class FetchItems extends VaultEvent {
   final String? folderId;
   const FetchItems({this.folderId});
@@ -16,6 +18,8 @@ class FetchItems extends VaultEvent {
 }
 
 class FetchFolders extends VaultEvent {}
+
+class VaultLockRequested extends VaultEvent {}
 
 class CreateFolder extends VaultEvent {
   final String name;

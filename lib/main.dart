@@ -5,9 +5,13 @@ import 'package:vaultx/core/di/injector.dart';
 import 'package:vaultx/core/security/session/session_lifecycle_observer.dart';
 import 'package:vaultx/core/security/session/vault_session_manager.dart';
 import 'package:vaultx/core/security/session/show_unlock_modal.dart';
+import 'package:vaultx/core/utils/loading_widget.dart';
+import 'package:vaultx/features/vault/presentation/bloc/vault_bloc.dart';
 import 'package:vaultx/features/vault/presentation/pages/vault_folders_page.dart';
 import 'package:vaultx/features/vault/presentation/pages/unlock_page.dart';
+import 'package:vaultx/features/vault/presentation/pages/setup_vault_page.dart';
 import 'package:vaultx/features/vault/presentation/bloc/vault_event.dart';
+import 'package:vaultx/features/vault/presentation/bloc/vault_state.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -85,7 +89,7 @@ class _VaultXState extends ConsumerState<VaultX> {
     );
 
     return BlocProvider(
-      create: (context) => ref.watch(vaultBlocProvider)..add(FetchFolders()),
+      create: (context) => ref.watch(vaultBlocProvider)..add(CheckInitializationStatus()),
       child: MaterialApp(
         navigatorKey: _navigatorKey,
         title: 'VaultX',
@@ -99,9 +103,25 @@ class _VaultXState extends ConsumerState<VaultX> {
             brightness: Brightness.dark,
           ),
         ),
-        home: !_hasUnlockedOnce && sessionState == VaultSessionState.locked
-            ? const UnlockPage() 
-            : const VaultFoldersPage(),
+        home: BlocBuilder<VaultBloc, VaultState>(
+          builder: (context, state) {
+            if (state is VaultLoading && state is! VaultLoaded) {
+              return const Scaffold(body: LoadingWidget());
+            }
+
+            if (state is VaultLocked) {
+              return const UnlockPage();
+            }
+
+            if (state is VaultNeedsSetup) {
+              return const SetupVaultPage();
+            }
+
+            return !_hasUnlockedOnce && sessionState == VaultSessionState.locked
+                ? const UnlockPage() 
+                : const VaultFoldersPage();
+          },
+        ),
       ),
     );
   }

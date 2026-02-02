@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,13 +13,15 @@ import 'package:vaultx/features/vault/domain/entities/vault_folder.dart';
 import 'dart:developer' as developer;
 
 class VaultBloc extends Bloc<VaultEvent, VaultState> {
-  final VaultItemRepository repository;
+  final VaultItemRepository itemRepository;
+  final VaultRepository vaultRepository;
   final VaultCrypto crypto;
   final SessionManager sessionManager;
   final UnlockVaultUsecase unlockVaultUsecase;
 
   VaultBloc({
-    required this.repository,
+    required this.itemRepository,
+    required this.vaultRepository,
     required this.crypto,
     required this.sessionManager,
     required this.unlockVaultUsecase,
@@ -32,14 +33,42 @@ class VaultBloc extends Bloc<VaultEvent, VaultState> {
     on<AddVaultItem>(_onAddItem);
     on<DeleteVaultItem>(_onDeleteItem);
     on<UnlockVaultRequested>(_onUnlockVaultRequested);
+    on<CheckInitializationStatus>(_onCheckInitializationStatus);
+    on<VaultLockRequested>(_onLockVaultRequest);
+  }
+
+  Future<void> _onCheckInitializationStatus(CheckInitializationStatus event, Emitter<VaultState> emit) async {
+    emit(VaultLoading());
+    try {
+      final metadata = await vaultRepository.getVaultMetadata();
+      if (metadata == null) {
+        emit(VaultNeedsSetup());
+      } else {
+        emit(VaultInitial());
+      }
+    } catch (e) {
+      emit(VaultError(e.toString()));
+    }
+  }
+
+  Future<void> _onLockVaultRequest(VaultLockRequested event, Emitter<VaultState> emit) async {
+    emit(VaultLoading());
+
+    try {
+      sessionManager.lock();
+      emit(VaultLocked());
+    } catch (e) {
+      developer.log('Lock vault error: $e', name: 'VaultBloc');
+      emit(VaultError(e.toString()));
+    }
   }
 
   Future<void> _onFetchItems(FetchItems event, Emitter<VaultState> emit) async {
     final List<VaultFolder> currentFolders = state is VaultLoaded ? (state as VaultLoaded).folders : [];
     emit(VaultLoading());
     try {
-      final items = await repository.getItems(folderId: event.folderId);
-      final folders = currentFolders.isEmpty ? await repository.getFolders() : currentFolders;
+      final items = await itemRepository.getItems(folderId: event.folderId);
+      final folders = currentFolders.isEmpty ? await itemRepository.getFolders() : currentFolders;
       emit(VaultLoaded(items: items, folders: folders));
     } catch (e) {
       emit(VaultError(e.toString()));
@@ -50,7 +79,7 @@ class VaultBloc extends Bloc<VaultEvent, VaultState> {
     final List<EncryptedItem> currentItems = state is VaultLoaded ? (state as VaultLoaded).items : [];
     emit(VaultLoading());
     try {
-      final folders = await repository.getFolders();
+      final folders = await itemRepository.getFolders();
       emit(VaultLoaded(items: currentItems, folders: folders));
     } catch (e) {
       emit(VaultError(e.toString()));
@@ -65,7 +94,7 @@ class VaultBloc extends Bloc<VaultEvent, VaultState> {
         createdAt: DateTime.now(),
         icon: event.icon,
       );
-      await repository.saveFolder(folder);
+      await itemRepository.saveFolder(folder);
       add(FetchFolders());
     } catch (e) {
       emit(VaultError(e.toString()));
@@ -74,7 +103,7 @@ class VaultBloc extends Bloc<VaultEvent, VaultState> {
 
   Future<void> _onDeleteFolder(DeleteFolder event, Emitter<VaultState> emit) async {
     try {
-      await repository.deleteFolder(event.id);
+      await itemRepository.deleteFolder(event.id);
       add(FetchFolders());
     } catch (e) {
       emit(VaultError(e.toString()));
@@ -102,7 +131,7 @@ class VaultBloc extends Bloc<VaultEvent, VaultState> {
 
       developer.log('Encrypted item: ${item.toString()}');
 
-      await repository.saveItem(item);
+      await itemRepository.saveItem(item);
       add(FetchItems(folderId: event.folderId));
     } catch (e) {
       developer.log("Error adding item $e", name: "VaultBloc");
@@ -113,7 +142,7 @@ class VaultBloc extends Bloc<VaultEvent, VaultState> {
   Future<void> _onDeleteItem(DeleteVaultItem event, Emitter<VaultState> emit) async {
     try {
       final String? currentFolderId = state is VaultLoaded ? (state as VaultLoaded).items.firstWhere((item) => item.id == event.id).folderId : null;
-      await repository.deleteItem(event.id);
+      await itemRepository.deleteItem(event.id);
       add(FetchItems(folderId: currentFolderId));
     } catch (e) {
       emit(VaultError(e.toString()));
@@ -125,8 +154,8 @@ class VaultBloc extends Bloc<VaultEvent, VaultState> {
     try {
       await unlockVaultUsecase.unlockOrInitialize(password: event.password);
       // After unlocking, fetch both folders and items
-      final folders = await repository.getFolders();
-      final items = await repository.getItems();
+      final folders = await itemRepository.getFolders();
+      final items = await itemRepository.getItems();
       emit(VaultLoaded(items: items, folders: folders));
     } catch (e) {
       emit(VaultError(e.toString()));

@@ -41,7 +41,7 @@ class _VaultFoldersPageState extends State<VaultFoldersPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings_outlined, color: VaultColors.textSecondary),
-            onPressed: () {},
+            onPressed: () => context.read<VaultBloc>().add(VaultLockRequested()),
           ),
         ],
       ),
