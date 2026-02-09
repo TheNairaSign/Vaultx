@@ -30,7 +30,7 @@ class AddItemSheet extends StatelessWidget {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: VaultColors.textMuted.withOpacity(0.3),
+                color: VaultColors.textMuted.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -116,7 +116,7 @@ class AddItemSheet extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: VaultColors.primary.withOpacity(0.3),
+                    color: VaultColors.primary.withValues(alpha: 0.3),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),

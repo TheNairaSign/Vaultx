@@ -241,16 +241,18 @@ class _CreateSecretPageState extends State<CreateSecretPage> {
       child: ElevatedButton.icon(
         onPressed: () {
           if (_titleController.text.isNotEmpty && _contentController.text.isNotEmpty) {
-            context.read<VaultBloc>().add(AddVaultItem(
-              title: _titleController.text,
-              content: _contentController.text,
-              folderId: widget.initialFolder?.id,
-            ));
+            context.read<VaultBloc>().add(
+              AddVaultItem(
+                title: _titleController.text,
+                content: _contentController.text,
+                folderId: widget.initialFolder?.id,
+              )
+            );
             Navigator.pop(context);
           }
         },
         icon: const Icon(Icons.save_outlined),
-        label: const Text('Save Secret'),
+        label: Text('Save Secret', style: Theme.of(context).textTheme.bodyMedium),
         style: ElevatedButton.styleFrom(
           backgroundColor: VaultColors.primary,
           foregroundColor: Colors.white,

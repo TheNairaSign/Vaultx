@@ -35,7 +35,7 @@ class _UnlockModalState extends State<UnlockModal> with SingleTickerProviderStat
   void _showPasswordDialog() {
     showGeneralDialog(
       context: context,
-      barrierDismissible: true,
+      barrierDismissible: false, // Prevent dismissing without entering password
       barrierLabel: 'Master Password',
       transitionDuration: const Duration(milliseconds: 300),
       pageBuilder: (context, anim1, anim2) {
@@ -66,6 +66,10 @@ class _UnlockModalState extends State<UnlockModal> with SingleTickerProviderStat
                     controller: _passwordController,
                     obscureText: true,
                     autofocus: true,
+                    onSubmitted: (value) {
+                      // Submit when user presses Enter/Done
+                      _submitPassword();
+                    },
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: 'Enter your password',
@@ -91,10 +95,7 @@ class _UnlockModalState extends State<UnlockModal> with SingleTickerProviderStat
                       const SizedBox(width: 12),
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: () {
-                            context.read<VaultBloc>().add(UnlockVaultRequested(password: _passwordController.text));
-                            Navigator.pop(context); // Only pop the password dialog
-                          },
+                          onPressed: _submitPassword,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: VaultColors.primary,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -111,6 +112,13 @@ class _UnlockModalState extends State<UnlockModal> with SingleTickerProviderStat
         );
       },
     );
+  }
+
+  void _submitPassword() {
+    if (_passwordController.text.isNotEmpty) {
+      context.read<VaultBloc>().add(UnlockVaultRequested(password: _passwordController.text));
+      Navigator.pop(context); // Only pop the password dialog
+    }
   }
 
   @override

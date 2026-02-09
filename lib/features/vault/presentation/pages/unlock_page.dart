@@ -18,7 +18,7 @@ class _UnlockPageState extends State<UnlockPage> {
   void _showPasswordDialog() {
     showGeneralDialog(
       context: context,
-      barrierDismissible: true,
+      barrierDismissible: false, // Prevent dismissing without entering password
       barrierLabel: 'Master Password',
       transitionDuration: const Duration(milliseconds: 300),
       pageBuilder: (context, anim1, anim2) {
@@ -49,6 +49,10 @@ class _UnlockPageState extends State<UnlockPage> {
                     controller: _passwordController,
                     obscureText: true,
                     autofocus: true,
+                    onSubmitted: (value) {
+                      // Submit when user presses Enter/Done
+                      _submitPassword();
+                    },
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: 'Enter your password',
@@ -74,10 +78,7 @@ class _UnlockPageState extends State<UnlockPage> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: () {
-                            context.read<VaultBloc>().add(UnlockVaultRequested(password: _passwordController.text));
-                            Navigator.pop(context);
-                          },
+                          onPressed: _submitPassword,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: VaultColors.primary,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -103,6 +104,13 @@ class _UnlockPageState extends State<UnlockPage> {
         );
       },
     );
+  }
+
+  void _submitPassword() {
+    if (_passwordController.text.isNotEmpty) {
+      context.read<VaultBloc>().add(UnlockVaultRequested(password: _passwordController.text));
+      Navigator.pop(context);
+    }
   }
 
   @override

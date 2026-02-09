@@ -38,13 +38,21 @@ class VaultBloc extends Bloc<VaultEvent, VaultState> {
   }
 
   Future<void> _onCheckInitializationStatus(CheckInitializationStatus event, Emitter<VaultState> emit) async {
-    emit(VaultLoading());
+    emit(VaultChecking());
     try {
       final metadata = await vaultRepository.getVaultMetadata();
       if (metadata == null) {
         emit(VaultNeedsSetup());
       } else {
-        emit(VaultInitial());
+        // Check if session is already unlocked (app returning from background)
+        if (sessionManager.isUnlocked) {
+          // Fetch data if already unlocked
+          final folders = await itemRepository.getFolders();
+          final items = await itemRepository.getItems();
+          emit(VaultLoaded(items: items, folders: folders));
+        } else {
+          emit(VaultLocked());
+        }
       }
     } catch (e) {
       emit(VaultError(e.toString()));
@@ -153,10 +161,26 @@ class VaultBloc extends Bloc<VaultEvent, VaultState> {
     emit(VaultLoading());
     try {
       await unlockVaultUsecase.unlockOrInitialize(password: event.password);
-      // After unlocking, fetch both folders and items
+      
+      // After unlocking/initializing, fetch both folders and items
       final folders = await itemRepository.getFolders();
       final items = await itemRepository.getItems();
-      emit(VaultLoaded(items: items, folders: folders));
+      
+      // Update session state to unlocked
+      if (!sessionManager.isUnlocked) {
+        // If session wasn't unlocked by the usecase, we need to check vault metadata
+        final metadata = await vaultRepository.getVaultMetadata();
+        if (metadata != null) {
+          // Vault exists, so it should be unlocked by now
+          emit(VaultLoaded(items: items, folders: folders));
+        } else {
+          // This shouldn't happen if unlockOrInitialize worked correctly
+          emit(VaultNeedsSetup());
+        }
+      } else {
+        // Session is already unlocked
+        emit(VaultLoaded(items: items, folders: folders));
+      }
     } catch (e) {
       emit(VaultError(e.toString()));
     }

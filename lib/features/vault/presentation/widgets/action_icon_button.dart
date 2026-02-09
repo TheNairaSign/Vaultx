@@ -32,7 +32,7 @@ class ActionIconButton extends StatelessWidget {
                 color: color ?? VaultColors.cardBackground,
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: VaultColors.textMuted.withOpacity(0.1),
+                  color: VaultColors.textMuted.withValues(alpha: 0.1),
                   width: 1,
                 ),
               ),

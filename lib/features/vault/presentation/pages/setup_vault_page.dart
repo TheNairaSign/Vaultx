@@ -39,7 +39,9 @@ class _SetupVaultPageState extends State<SetupVaultPage> {
       return;
     }
 
-    context.read<VaultBloc>().add(UnlockVaultRequested(password: _passwordController.text));
+    // Clear confirmation controllers after successful validation
+    final password = _passwordController.text;
+    context.read<VaultBloc>().add(UnlockVaultRequested(password: password));
   }
 
   @override

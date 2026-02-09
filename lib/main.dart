@@ -81,7 +81,7 @@ class _VaultXState extends ConsumerState<VaultX> {
   @override
   Widget build(BuildContext context) {
     final sessionState = ref.watch(sessionManagerProvider.select((s) => s.state));
-    
+
     // Listen for session state changes
     ref.listen<VaultSessionState>(
       sessionManagerProvider.select((s) => s.state),
@@ -105,21 +105,26 @@ class _VaultXState extends ConsumerState<VaultX> {
         ),
         home: BlocBuilder<VaultBloc, VaultState>(
           builder: (context, state) {
-            if (state is VaultLoading && state is! VaultLoaded) {
+            if (state is VaultChecking || (state is VaultLoading && state is! VaultLoaded)) {
               return const Scaffold(body: LoadingWidget());
-            }
-
-            if (state is VaultLocked) {
-              return const UnlockPage();
             }
 
             if (state is VaultNeedsSetup) {
               return const SetupVaultPage();
             }
 
-            return !_hasUnlockedOnce && sessionState == VaultSessionState.locked
-                ? const UnlockPage() 
-                : const VaultFoldersPage();
+            if (state is VaultLocked) {
+              return const UnlockPage();
+            }
+
+            // For all other loaded states, show the main page
+            if (state is VaultLoaded || 
+                (state is VaultInitial && sessionState == VaultSessionState.unlocked)) {
+              return const VaultFoldersPage();
+            }
+
+            // Default fallback to unlock page if session is locked
+            return const UnlockPage();
           },
         ),
       ),

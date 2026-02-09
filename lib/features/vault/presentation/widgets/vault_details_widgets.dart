@@ -21,7 +21,7 @@ class MetadataCard extends StatelessWidget {
         color: VaultColors.cardBackground,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: VaultColors.textMuted.withOpacity(0.1),
+          color: VaultColors.textMuted.withValues(alpha: 0.1),
           width: 1,
         ),
       ),

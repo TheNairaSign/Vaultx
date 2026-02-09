@@ -57,7 +57,7 @@ class PasskeyGrid extends StatelessWidget {
           color: VaultColors.secondary,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: VaultColors.textMuted.withOpacity(0.2),
+            color: VaultColors.textMuted.withValues(alpha: 0.2),
             width: 1,
           ),
         ),
